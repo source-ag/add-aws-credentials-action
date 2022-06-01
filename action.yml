@@ -1,0 +1,49 @@
+name: "AWS Credentials Action"
+description: Github Action to configure credentials for AWS without using environment variables
+inputs:
+  aws-access-key-id:
+    description: AWS Access Key ID
+    required: true
+  aws-secret-access-key:
+    description: AWS Secret Access Key
+    required: true
+  aws-region:
+    description: AWS Region, e.g. eu-central-1
+    required: true
+  role-to-assume:
+    description: IAM Role to assume that has access to CodeArtifact
+    required: false
+  role-duration-seconds:
+    description: "Role duration in seconds (default: 1 hour)"
+    required: false
+    default: "3600"
+  role-session-name:
+    description: 'Role session name (default: GitHubActions)'
+    required: false
+    default: GitHubActions
+
+
+runs:
+  using: composite
+  steps:
+    - name: Configure AWS Credentials
+      shell: bash
+      run: |
+        mkdir -p ~/.aws
+        cat <<-EOF > ~/.aws/credentials
+          [default]
+          aws_access_key_id=${{ inputs.aws-access-key-id }}
+          aws_secret_access_key=${{ inputs.aws-secret-access-key }}
+          region=${{ inputs.aws-region }}
+        EOF
+        if [ -n "${{ inputs.role-to-assume }}" ]; then
+          printf "[default]\nregion=%s\nAWS_ACCESS_KEY_ID=%s\nAWS_SECRET_ACCESS_KEY=%s\nAWS_SESSION_TOKEN=%s" \
+          ${{ inputs.aws-region }} \
+          $(aws sts assume-role \
+          --role-arn "${{ inputs.role-to-assume }}" \
+          --role-session-name ${{ inputs.role-session-name }} \
+          --query "Credentials.[AccessKeyId,SecretAccessKey,SessionToken]" \
+          --output text \
+          --duration-seconds ${{ inputs.role-duration-seconds }} \
+          ) > ~/.aws/credentials
+        fi
