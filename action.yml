@@ -36,6 +36,12 @@ runs:
           aws_secret_access_key=${{ inputs.aws-secret-access-key }}
           region=${{ inputs.aws-region }}
         EOF
+        cat <<-EOF > ~/.aws/config
+          [default]
+          region=${{ inputs.aws-region }}
+        EOF
+        echo "AWS_REGION=${{ inputs.aws-region }}" >> $GITHUB_ENV
+        echo "AWS_DEFAULT_REGION=${{ inputs.aws-region }}" >> $GITHUB_ENV
         if [ -n "${{ inputs.role-to-assume }}" ]; then
           printf "[default]\nregion=%s\nAWS_ACCESS_KEY_ID=%s\nAWS_SECRET_ACCESS_KEY=%s\nAWS_SESSION_TOKEN=%s" \
           ${{ inputs.aws-region }} \
