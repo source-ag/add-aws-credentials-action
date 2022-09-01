@@ -1,5 +1,13 @@
 # AWS Credentials Action
 
+## :warning: DEPRECATED
+
+Please use [`aws-actions/configure-aws-credentials`](https://github.com/aws-actions/configure-aws-credentials) 
+instead. [The bug](https://github.com/actions/runner/issues/789) that the action in this repo is a workaround for has 
+been fixed, so we can use the official action instead.
+
+---
+
 This Github Action will configure AWS credentials without using environment variables. 
 Contrary to the [official Github Action](https://github.com/aws-actions/configure-aws-credentials) 
 for configuring credentials, this action can be called multiple times in a workflow, completely 
